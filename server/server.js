@@ -22,22 +22,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS CONFIGURATION
+// Define this BEFORE the CORS configuration
+const allowedOrigins = [
+  'http://localhost:8080',      
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'https://wqar-3k5u.vercel.app', 
+  'https://www.wiqar-perfume.com',
+  'https://wiqar-perfume.com',
+  'http://www.wiqar-perfume.com',
+  'http://wiqar-perfume.com',
+  /\.vercel\.app$/
+];
 
+// ✅ CORS CONFIGURATION
 app.use(cors({
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:8080',      
-      'http://localhost:3000',
-      'http://localhost:5000',
-      'https://wqar-3k5u.vercel.app', 
-      'https://www.wiqar-perfume.com',
-      'https://wiqar-perfume.com',
-      'http://www.wiqar-perfume.com',
-      'http://wiqar-perfume.com',
-      /\.vercel\.app$/
-    ];
-    
+  origin: function(origin, callback) {    
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
@@ -60,6 +60,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Later in your console.log (line ~260), it will work:
+console.log(`🌐 CORS enabled for origins: ${allowedOrigins.join(', ')}\n`);
 
 // Static folder for uploads (for backward compatibility with old images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
