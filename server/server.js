@@ -23,7 +23,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ CORS CONFIGURATION
-const allowedOrigins = [
+
+
+app.use(cors({
+  origin: function(origin, callback) {
+
+  const allowedOrigins = [
   'http://localhost:8080',      
   'http://localhost:3000',
   'http://localhost:5000',
@@ -32,11 +37,7 @@ const allowedOrigins = [
   'https://wiqar-perfume.com',
   'http://www.wiqar-perfume.com',
   'http://wiqar-perfume.com',
-  /\.vercel\.app$/  
-];
-
-app.use(cors({
-  origin: function(origin, callback) {
+  /\.vercel\.app$/  ];
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
