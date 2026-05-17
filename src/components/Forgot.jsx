@@ -264,7 +264,7 @@ const Forgot = () => {
     setSendingCode(true);
     
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://wqar-api.onrender.com/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
       
       const response = await fetch(`${API_BASE}/users/forgot-password`, {
         method: 'POST',

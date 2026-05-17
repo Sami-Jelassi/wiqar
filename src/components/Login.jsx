@@ -144,157 +144,158 @@ const Login = () => {
   };
 
   // Form validation with translations
- const validateForm = () => {
-  const newErrors = {};
-  
-  // Email validation
-  if (!formData.email || !formData.email.trim()) {
-    newErrors.email = t('login.errors.emailRequired');
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    newErrors.email = t('login.errors.emailInvalid');
-  }
-  
-  // Password validation
-  if (!formData.password) {
-    newErrors.password = t('login.errors.passwordRequired');
-  } else if (formData.password.length < 6) {
-    newErrors.password = t('login.errors.passwordMinLength');
-  }
-  
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Email validation
+    if (!formData.email || !formData.email.trim()) {
+      newErrors.email = t('login.errors.emailRequired');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = t('login.errors.emailInvalid');
+    }
+    
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = t('login.errors.passwordRequired');
+    } else if (formData.password.length < 6) {
+      newErrors.password = t('login.errors.passwordMinLength');
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  // Handle login submission - Updated for backend integration
-const handleLogin = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    return;
-  }
-  
-  setLoading(true);
-  
-  try {
-    // Get API base URL with fallback
-    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  // ✅ FIXED: Handle login submission - Uses same pattern as working order submission
+  const handleLogin = async (e) => {
+    e.preventDefault();
     
-    console.log('Attempting login to:', `${API_BASE}/users/login`);
-    console.log('With email:', formData.email);
-    
-    // Call your backend login endpoint
-    const response = await fetch(`${API_BASE}/api/users/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.email.trim(),
-        password: formData.password,
-      }),
-    });
-    
-    console.log('Response status:', response.status);
-    
-    // Check if response is JSON
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const text = await response.text();
-      console.error('Non-JSON response:', text.substring(0, 200));
-      throw new Error('Server error. Please try again later.');
+    if (!validateForm()) {
+      return;
     }
     
-    const data = await response.json();
-    console.log('Response data:', data);
+    setLoading(true);
     
-    if (!response.ok) {
-      // Handle specific error cases with proper messages
-      if (response.status === 401) {
-        throw new Error(data.message || t('login.errors.invalidCredentials'));
-      } else if (response.status === 404) {
-        throw new Error('Login service not found. Please contact support.');
-      } else if (response.status === 500) {
-        throw new Error(t('login.errors.serverError'));
-      } else {
-        throw new Error(data.message || t('login.errors.loginFailed'));
+    try {
+      // ✅ Use the same VITE_API_URL pattern that works for orders
+      // This will be '/api' in development and can be overridden in production
+      const API_BASE = import.meta.env.VITE_API_URL || '/api';
+      
+      console.log('Attempting login to:', `${API_BASE}/users/login`);
+      console.log('With email:', formData.email);
+      
+      // ✅ Call your VPS backend through the proxy (same as orders)
+      const response = await fetch(`${API_BASE}/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+        }),
+      });
+      
+      console.log('Response status:', response.status);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text.substring(0, 200));
+        throw new Error('Server error. Please try again later.');
       }
-    }
-    
-    // Validate response data
-    if (!data.token) {
-      throw new Error('Invalid response from server: missing token');
-    }
-    
-    // Store user data and token based on remember me option
-    const userData = {
-      id: data._id || data.id,
-      firstName: data.firstName || data.firstname || '',
-      lastName: data.lastName || data.lastname || '',
-      email: data.email,
-      role: data.role || 'user',
-      profilePicture: data.profilePicture || data.avatar || null,
-      token: data.token
-    };
-    
-    // Store auth data
-    if (formData.rememberMe) {
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      // Set token expiry (30 days)
-      const expiry = new Date();
-      expiry.setDate(expiry.getDate() + 30);
-      localStorage.setItem('tokenExpiry', expiry.toISOString());
-    } else {
-      sessionStorage.setItem('authToken', data.token);
-      sessionStorage.setItem('user', JSON.stringify(userData));
-    }
-    
-    // Set default authorization header for future axios requests
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    
-    // Show success message
-    setSnackbar({
-      open: true,
-      message: `${t('login.success') || 'Success!'} ${t('login.welcomeBack') || 'Welcome back'} ${userData.firstName}!`,
-      severity: 'success',
-    });
-    
-    // Redirect after successful login
-    setTimeout(() => {
-      if (userData.role === 'admin') {
-        navigate('/dashboard');
-      } else {
-        navigate('/dashboard');
+      
+      const data = await response.json();
+      console.log('Response data:', data);
+      
+      if (!response.ok) {
+        // Handle specific error cases with proper messages
+        if (response.status === 401) {
+          throw new Error(data.message || t('login.errors.invalidCredentials'));
+        } else if (response.status === 404) {
+          throw new Error('Login service not found. Please contact support.');
+        } else if (response.status === 500) {
+          throw new Error(t('login.errors.serverError'));
+        } else {
+          throw new Error(data.message || t('login.errors.loginFailed'));
+        }
       }
-    }, 1500);
-    
-  } catch (error) {
-    console.error('Login error details:', error);
-    
-    // Handle network errors
-    let errorMessage = error.message;
-    
-    if (error.message === 'Failed to fetch') {
-      errorMessage = 'Cannot connect to server. Please check if the server is running.';
-    } else if (error.message.includes('NetworkError')) {
-      errorMessage = 'Network error. Please check your internet connection.';
-    } else if (!errorMessage) {
-      errorMessage = t('login.errors.invalidCredentials');
+      
+      // Validate response data
+      if (!data.token) {
+        throw new Error('Invalid response from server: missing token');
+      }
+      
+      // Store user data and token based on remember me option
+      const userData = {
+        id: data._id || data.id || data.user?.id,
+        firstName: data.firstName || data.firstname || data.user?.firstName || '',
+        lastName: data.lastName || data.lastname || data.user?.lastName || '',
+        email: data.email || data.user?.email,
+        role: data.role || data.user?.role || 'user',
+        profilePicture: data.profilePicture || data.avatar || data.user?.profilePicture || null,
+        token: data.token
+      };
+      
+      // Store auth data
+      if (formData.rememberMe) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        // Set token expiry (30 days)
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 30);
+        localStorage.setItem('tokenExpiry', expiry.toISOString());
+      } else {
+        sessionStorage.setItem('authToken', data.token);
+        sessionStorage.setItem('user', JSON.stringify(userData));
+      }
+      
+      // Set default authorization header for future axios requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+      
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `${t('login.success') || 'Success!'} ${t('login.welcomeBack') || 'Welcome back'} ${userData.firstName}!`,
+        severity: 'success',
+      });
+      
+      // Redirect after successful login
+      setTimeout(() => {
+        if (userData.role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Login error details:', error);
+      
+      // Handle network errors
+      let errorMessage = error.message;
+      
+      if (error.message === 'Failed to fetch') {
+        errorMessage = 'Cannot connect to server. Please check if the backend is running.';
+      } else if (error.message.includes('NetworkError')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (!errorMessage) {
+        errorMessage = t('login.errors.invalidCredentials');
+      }
+      
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: 'error',
+      });
+      
+      // Clear password field on error for security
+      setFormData(prev => ({ ...prev, password: '' }));
+    } finally {
+      setLoading(false);
     }
-    
-    setSnackbar({
-      open: true,
-      message: errorMessage,
-      severity: 'error',
-    });
-    
-    // Clear password field on error for security
-    setFormData(prev => ({ ...prev, password: '' }));
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Handle forgot password
   const handleForgotPassword = () => {

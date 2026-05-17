@@ -25,7 +25,7 @@ import axios from 'axios';
 import '@fontsource/oswald';
 
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
 
 // ✅ Helper function to get full image URL (supports Cloudinary)
 const getFullImageUrl = (imagePath) => {
@@ -35,7 +35,7 @@ const getFullImageUrl = (imagePath) => {
   if (imagePath.startsWith('http')) return imagePath;
   
   // If it's a local path
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
   const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
   const cleanPath = imagePath.replace(/^\/+/, '');
   return `${cleanBaseUrl}/${cleanPath}`;

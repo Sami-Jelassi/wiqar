@@ -246,7 +246,7 @@ const Navbar = () => {
   const getFullImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:6000';
     const cleanBaseUrl = baseUrl.replace(/\/api$/, '');
     const cleanPath = imagePath.replace(/^\/+/, '');
     return `${cleanBaseUrl}/${cleanPath}`;

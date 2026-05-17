@@ -47,7 +47,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 
 // ==================== API CONFIGURATION ====================
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
 
 const getStoredUser = () => {
   const userStr = sessionStorage.getItem('user');

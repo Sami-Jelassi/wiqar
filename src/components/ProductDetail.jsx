@@ -271,7 +271,7 @@ const ProductDetail = () => {
 
     setOrderSubmitting(true);
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
       
       const orderData = {
         items: [{

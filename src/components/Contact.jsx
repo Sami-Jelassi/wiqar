@@ -29,7 +29,7 @@ import { useLanguage } from '../components/LanguageContext';
 import axios from 'axios';
 import '@fontsource/oswald';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
 
 const FormContainer = styled(Paper)(({ theme }) => ({
   borderRadius: '32px',

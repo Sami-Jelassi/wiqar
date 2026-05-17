@@ -25,7 +25,7 @@ import * as XLSX from 'xlsx';
 import axios from 'axios';
 
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:6000/api';
 
 // Get token from localStorage
 const getAuthToken = () => {
@@ -115,9 +115,8 @@ const getImageUrl = (imagePath) => {
     return imagePath;
   }
   
-  // For backward compatibility with old local uploads
-  if (imagePath.startsWith('uploads/')) {
-    return `https://wqar-api.onrender.com/${imagePath}`;
+  if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
+    return `/uploads/${imagePath.replace(/^\/uploads\//, '').replace(/^uploads\//, '')}`;
   }
   
   // For relative paths
